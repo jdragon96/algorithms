@@ -1,2 +1,2 @@
 # algorithms
-Algorithm repository using multiple languages
+Algorithm repository using various languages.
