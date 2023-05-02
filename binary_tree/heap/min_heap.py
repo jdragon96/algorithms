@@ -1,47 +1,3 @@
-class MinHeap:
-    def __init__(self):
-        self.heap = []
-
-    def peek(self):
-        if not self.heap:
-            return False
-        return self.heap[0]
-
-    def push(self, data):
-        if type(data) == list:
-          for value in data:
-            self.heap.append(value)
-        else:
-          self.heap.append(data)
-        self.heapify_up()
-
-    def heapify_up(self):
-        child = len(self.heap) - 1
-        parent = (child - 1) // 2
-        while self.heap[child] < self.heap[parent] and child != 0:
-            self.heap[child], self.heap[parent] = self.heap[parent], self.heap[child]
-            child = parent
-            parent = (child - 1) // 2
-
-    def pop(self):
-        if not self.heap:
-            return False
-        self.heap[0], self.heap[-1] = self.heap[-1], self.heap[0]
-        data = self.heap.pop()
-        self.heapify_down()
-        return data
-
-    def heapify_down(self):
-        i = 0
-        while (2*i+1) < len(self.heap):
-            smaller_idx = 2*i+1
-            if (2*i+2) < len(self.heap) and self.heap[2*i+2] < self.heap[2*i+1]:
-                smaller_idx = 2*i+2
-            if self.heap[smaller_idx] > self.heap[i]:
-                return
-            self.heap[smaller_idx], self.heap[i] = self.heap[i], self.heap[smaller_idx]
-            i = smaller_idx
-
 class Heap:
   """
         n
@@ -49,7 +5,7 @@ class Heap:
     순서로 힙 구성
   """
   heap: list
-  def __init__(self) -> None:
+  def __init__(self, vlaues: list) -> None:
     self.heap = []
 
   def _get_parent_index(self, index):
@@ -119,19 +75,7 @@ class Heap:
            # 하위 노드와 교체할 수 없다면 종료한다.
            break
 
-heap = MinHeap()
-# heap.push()
-
 heap2 = Heap()
-
-print(5 // 2)
-print(5 % 2)
-
-
-for value in [5,3,1,2,6,8]:
-  heap.push(value)
-print(heap.heap)
-
 for value in [5,3,1,2,6,8]:
   heap2.push(value)
 print(heap2.heap)
