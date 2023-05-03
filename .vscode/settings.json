@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "kdtree_core.h": "c",
+    "float.h": "c"
+  }
+}
