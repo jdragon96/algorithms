@@ -1,4 +1,11 @@
-class Heap:
+import heapq
+from enum import Enum
+class ChildPosition(Enum):
+  LEFT=0
+  RIGHT=1
+  ROOT=3
+
+class MinHeap:
   """
         n
     2n+1  2n+2
@@ -8,37 +15,60 @@ class Heap:
   def __init__(self, values: list = []) -> None:
     self.heap = []
     for value in values:
-      self.heap_up(value, self.heap)
+      self._heap_up(value, self.heap)
 
+  # Functions #############################################################################
   def _get_parent_index(self, index):
     # n => 2n+1, 2n+2
     return int((index - 1) / 2)
-  def _get_current_index(self):
-    return len(self.heap) - 1
+  
+  def _get_current_index(self, heap):
+    return len(heap) - 1
+  
   def _get_left_child_index(self, parent):
     return 2 * parent + 1
+  
   def _get_right_child_index(self, parent):
     return 2 * parent + 2
+  
+  def _what_is_node_position(self, index):
+    if index == 0: return ChildPosition.ROOT
+    elif index % 2 == 0: return ChildPosition.RIGHT
+    elif index % 2 == 1: return ChildPosition.LEFT
 
-  def push(self, value):
-    # Leaf node에 값을 push한 후, 정렬한다.
-    self.heap_up(value, self.heap)
+  def _sort_between_left_and_right(self, heap, current_node_index):
+    pos = self._what_is_node_position(current_node_index)
+    if pos == ChildPosition.LEFT:
+      if len(heap) >= current_node_index:
+        if heap[current_node_index] > heap[current_node_index+1]:
+          heap[current_node_index], heap[current_node_index+1] = heap[current_node_index+1], heap[current_node_index]
+          current_node_index = current_node_index+1
+    elif pos == ChildPosition.RIGHT:
+      if heap[current_node_index] < heap[current_node_index-1]:
+        heap[current_node_index], heap[current_node_index-1] = heap[current_node_index-1], heap[current_node_index]
+        current_node_index = current_node_index-1
 
-  def pop(self):
-    if len(self.heap) < 1: return None
-    if len(self.heap) == 1: return self.heap.pop()
+  def _sort_in_same_level(self, heap, current_node_index):
+    """ 
+    - 동일한 레벨에 있는 node를 정렬한다 -> 왼쪽 데이터하고만 비교한다.
+    - 
+    """
+    pos = self._what_is_node_position(current_node_index)
+    if pos == ChildPosition.LEFT:
+      if len(heap) >= current_node_index:
+        if heap[current_node_index] > heap[current_node_index+1]:
+          heap[current_node_index], heap[current_node_index+1] = heap[current_node_index+1], heap[current_node_index]
+          current_node_index = current_node_index+1
+    elif pos == ChildPosition.RIGHT:
+      if heap[current_node_index] < heap[current_node_index-1]:
+        heap[current_node_index], heap[current_node_index-1] = heap[current_node_index-1], heap[current_node_index]
+        current_node_index = current_node_index-1
 
-    self.heap[0], self.heap[-1] = self.heap[-1], self.heap[0]
-    value = self.heap.pop()
-    self.heap_down(self.heap)
-
-    return value
-
-  def heap_up(self, value, heap: list):
+  def _heap_up(self, value, heap: list):
     if heap is None: raise("힙 인스턴스가 할당되지 않았습니다.")
     heap.append(value)
     if len(heap) < 2: return
-    current_node_index = self._get_current_index()
+    current_node_index = self._get_current_index(heap)
     parent_node_index = self._get_parent_index(current_node_index)
 
     # 부모 node의 value가 더 작을 때, 중단한다.
@@ -47,8 +77,9 @@ class Heap:
       heap[current_node_index], heap[parent_node_index] = heap[parent_node_index], heap[current_node_index]
       current_node_index = parent_node_index
       parent_node_index = self._get_parent_index(current_node_index)
+      self._sort_between_left_and_right(heap, current_node_index)
 
-  def heap_down(self, heap):
+  def _heap_down(self, heap):
     current_index = 0
     left_leaf_index = self._get_left_child_index(current_index)
     right_leaf_index = self._get_right_child_index(current_index)
@@ -73,18 +104,38 @@ class Heap:
           left_leaf_index = self._get_left_child_index(right_leaf_index)
           right_leaf_index = self._get_right_child_index(right_leaf_index)
         else:
-           # 하위 노드와 교체할 수 없다면 종료한다.
-           break
+          # 하위 노드와 교체할 수 없다면 종료한다.
+          break
 
-heap2 = Heap([5,3,1,2,6,8])
-# for value in [5,3,1,2,6,8]:
-#   heap2.push(value)
-print(heap2.heap)
-print(heap2.pop())
-print(heap2.pop())
-print(heap2.pop())
-print(heap2.pop())
-print(heap2.pop())
-print(heap2.pop())
-print(heap2.pop())
-print(heap2.pop())
+  # Commands ####################################################################################
+  def push(self, value):
+    # Leaf node에 값을 push한 후, 정렬한다.
+    self._heap_up(value, self.heap)
+
+  def pop(self):
+    if len(self.heap) < 1: return None
+    if len(self.heap) == 1: return self.heap.pop()
+
+    self.heap[0], self.heap[-1] = self.heap[-1], self.heap[0]
+    value = self.heap.pop()
+    self._heap_down(self.heap)
+
+    return value
+
+  def remove(self, value):
+    if self.heap.__contains__(value):
+      self.heap.remove(value)
+
+if __name__ == "__main__":
+  heap2 = MinHeap([7,5,3,1,7,2,6,8])
+  print(heap2.heap)
+  heap2.remove(1)
+  print(heap2.heap)
+  print(heap2.pop())
+  print(heap2.pop())
+  print(heap2.pop())
+  print(heap2.pop())
+  print(heap2.pop())
+  print(heap2.pop())
+  print(heap2.pop())
+  print(heap2.pop())
